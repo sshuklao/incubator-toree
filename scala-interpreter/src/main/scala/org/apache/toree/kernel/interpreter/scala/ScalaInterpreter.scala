@@ -191,7 +191,7 @@ class ScalaInterpreter(private val config:Config = ConfigFactory.load) extends I
 
   def prepareResult(interpreterOutput: String,
                     showType: Boolean = false,
-                    noTruncate: Boolean = false
+                    truncate: Boolean = true
                    ): (Option[AnyRef], Option[String], Option[String]) = {
     if (interpreterOutput.isEmpty) {
       return (None, None, None)
@@ -209,14 +209,14 @@ class ScalaInterpreter(private val config:Config = ConfigFactory.load) extends I
         lastResultAsString = result.map(String.valueOf(_)).getOrElse("")
         lastResult = result
 
-        val defLine = (showType, noTruncate) match {
+        val defLine = (showType, truncate) match {
           case (true, true) =>
             s"$name: $vtype = $lastResultAsString\n"
           case (true, false) =>
             s"$name: $vtype = $value\n"
-          case (false, true) =>
-            s"$name = $lastResultAsString\n"
           case (false, false) =>
+            s"$name = $lastResultAsString\n"
+          case (false, true) =>
             lastResultAsString = value
             lastResult = Some(value)
             s"$name = $value\n"
@@ -300,7 +300,7 @@ class ScalaInterpreter(private val config:Config = ConfigFactory.load) extends I
          val lastOutput = lastResultOut.toString("UTF-8").trim
          lastResultOut.reset()
 
-         val (obj, defStr, text) = prepareResult(lastOutput, KernelOptions.showTypes, KernelOptions.noTruncation )
+         val (obj, defStr, text) = prepareResult(lastOutput, KernelOptions.showTypes, ! KernelOptions.noTruncation )
          defStr.foreach(kernel.display.content(MIMEType.PlainText, _))
          text.foreach(kernel.display.content(MIMEType.PlainText, _))
          val output = obj.map(Displayers.display(_).asScala.toMap).getOrElse(Map.empty)
