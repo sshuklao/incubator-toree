@@ -217,6 +217,8 @@ class ScalaInterpreter(private val config:Config = ConfigFactory.load) extends I
           case (false, true) =>
             s"$name = $lastResultAsString\n"
           case (false, false) =>
+            lastResultAsString = value
+            lastResult = Some(value)
             s"$name = $value\n"
         }
 
@@ -237,7 +239,6 @@ class ScalaInterpreter(private val config:Config = ConfigFactory.load) extends I
               lastResultAsString = defLine
               lastResult = Some(defLine)
             }
-
           }
         }
 
